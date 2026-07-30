@@ -5,37 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>멘델의 유전 법칙 탐구 실험실</title>
   
+  <!-- Chart.js 및 CSS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    /* 기존 스타일 유지 및 UI 개선 */
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
     .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
     .tab-nav { display: flex; border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
     .tab-btn { padding: 12px 24px; border: none; background: none; font-size: 16px; font-weight: bold; color: #666; cursor: pointer; }
     .tab-btn.active { color: #2b6cb0; border-bottom: 3px solid #2b6cb0; }
+    .tab-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .section { display: none; }
     .section.active { display: block; }
     .card { background: #fafafa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 15px; }
     .btn { background: #3182ce; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn:hover { background: #2b6cb0; }
-    .btn:disabled { background: #cbd5e0; cursor: not-allowed; }
     .toast { position: fixed; bottom: 20px; right: 20px; background: #2d3748; color: white; padding: 12px 20px; border-radius: 6px; display: none; z-index: 1000; }
   </style>
+
+  <!-- Firebase SDKs (v10.x ES Module / Web) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Firebase 설정
+    const firebaseConfig = {
+      apiKey: "AIzaSyDB0HVH6kPrdGk0YaWcSoK3KmP9LvbJml8",
+      authDomain: "mendel-lab.firebaseapp.com",
+      projectId: "mendel-lab",
+      storageBucket: "mendel-lab.firebasestorage.app",
+      messagingSenderId: "984744170387",
+      appId: "1:984744170387:web:317255b90462e02c8cce66"
+    };
+
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 전역에서 접근 가능하도록 설정
+    window.db = db;
+    window.firebaseAddDoc = addDoc;
+    window.firebaseCollection = collection;
+    window.firebaseServerTimestamp = serverTimestamp;
+  </script>
 </head>
 <body>
   <div class="container">
     <h2>🧬 멘델의 유전 법칙 탐구 실험실</h2>
 
+    <!-- 네비게이션 탭 -->
     <div class="tab-nav">
       <button class="tab-btn active" onclick="switchTab(1)">1. 형질 선택 및 가설</button>
-      <button class="tab-btn" onclick="switchTab(2)">2. F₁ 교배 실험</button>
-      <button class="tab-btn" onclick="switchTab(3)">3. F₂ 자가교배 및 분석</button>
+      <button class="tab-btn" id="tab2" onclick="switchTab(2)">2. F₁ 교배 실험</button>
+      <button class="tab-btn" id="tab3" onclick="switchTab(3)">3. F₂ 자가교배 및 분석</button>
     </div>
 
-    <!-- 1단계 -->
+    <!-- 탭 1: 형질 선택 및 가설 -->
     <div id="section1" class="section active">
       <div class="card">
         <h3>탐구할 대립형질 선택</h3>
-        <select id="traitSelect" onchange="state.trait = this.value">
+        <select id="traitSelect" onchange="onTraitChange()">
           <option value="씨앗 모양">씨앗 모양 (둥근 R / 주름진 r)</option>
           <option value="씨앗 색깔">씨앗 색깔 (황색 Y / 초록색 y)</option>
           <option value="꽃 색깔">꽃 색깔 (보라색 P / 흰색 p)</option>
@@ -43,22 +72,24 @@
       </div>
       <div class="card">
         <h3>가설 설정</h3>
+        <p>순종의 우성/열성 어버이를 교배할 때 F₁과 F₂에서 나타날 표현형 비율을 예측해 보세요.</p>
         <textarea id="hypothesis" style="width: 100%; height: 80px;" placeholder="예: F1에서는 우성 형질만 나타나고, F2에서는 3:1 비율로 나타날 것이다."></textarea>
       </div>
       <button class="btn" onclick="saveStep1()">다음 단계로 (F₁ 실험)</button>
     </div>
 
-    <!-- 2단계 -->
+    <!-- 탭 2: F₁ 교배 실험 -->
     <div id="section2" class="section">
       <div class="card">
         <h3>F₁ 잡종 1세대 교배</h3>
+        <p id="f1Desc">선택한 형질에 대한 순종 어버이 교배를 진행합니다.</p>
         <button class="btn" onclick="runF1Experiment()">F₁ 교배 실행</button>
         <div id="f1Result" style="margin-top: 15px; font-weight: bold;"></div>
       </div>
       <button class="btn" onclick="saveStep2()">다음 단계로 (F₂ 실험)</button>
     </div>
 
-    <!-- 3단계 -->
+    <!-- 탭 3: F₂ 자가교배 및 분석 -->
     <div id="section3" class="section">
       <div class="card">
         <h3>F₂ 자가교배 실험 (대량 표본)</h3>
@@ -75,18 +106,16 @@
 
       <div class="card">
         <h3>탐구 결과 분석 및 결론 제출</h3>
-        <textarea id="finalConclusion" style="width: 100%; height: 100px;" placeholder="실험 결과 및 표본 크기에 따른 비율 변화를 포함하여 결론을 작성하세요."></textarea>
+        <textarea id="finalConclusion" style="width: 100%; height: 100px;" placeholder="실험 결과 및 표본 크기에 따른 비율 변화, 통계적 수렴 현상을 포함하여 결론을 작성하세요."></textarea>
       </div>
-      <button class="btn" id="submitBtn" onclick="submitResult()">최종 결과 제출 및 AI 평가</button>
+      <button class="btn" onclick="submitToFirebase()">최종 결과 제출 (Firebase)</button>
     </div>
   </div>
 
   <div id="toast" class="toast"></div>
 
   <script>
-    // ⚠️ 배포된 Cloud Function URL로 변경하세요.
-    const FUNCTION_URL = "https://us-central1-mendel-lab.cloudfunctions.net/submitAndEvaluate";
-
+    // 상태 관리
     const state = {
       trait: '씨앗 모양',
       hypothesis: '',
@@ -103,9 +132,16 @@
       setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
 
+    // [보완점 반영] 탭 이동 제어 로직 강화
     function switchTab(step) {
-      if (step === 2 && !state.hypothesis.trim()) return alert('가설을 작성하세요.');
-      if (step === 3 && !state.f1Done) return alert('F₁ 교배를 먼저 진행하세요.');
+      if (step === 2 && !state.hypothesis.trim()) {
+        alert('가설을 먼저 작성해 주세요.');
+        return;
+      }
+      if (step === 3 && !state.f1Done) {
+        alert('F₁ 교배 실험을 먼저 진행해 주세요.');
+        return;
+      }
 
       document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -114,81 +150,97 @@
       document.querySelectorAll('.tab-btn')[step - 1].classList.add('active');
     }
 
+    function onTraitChange() {
+      state.trait = document.getElementById('traitSelect').value;
+    }
+
     function saveStep1() {
       state.hypothesis = document.getElementById('hypothesis').value;
-      if (!state.hypothesis.trim()) return alert('가설을 입력하세요.');
+      if (!state.hypothesis.trim()) {
+        alert('가설을 입력해주세요.');
+        return;
+      }
       switchTab(2);
     }
 
     function runF1Experiment() {
       state.f1Done = true;
       document.getElementById('f1Result').innerText = `[결론] F₁ 세대 결과: 모든 개체에서 우성 형질만 발현되었습니다.`;
-      showToast('F₁ 교배 완료');
+      showToast('F₁ 교배가 완료되었습니다.');
     }
 
     function saveStep2() {
-      if (!state.f1Done) return alert('F₁ 교배를 진행하세요.');
+      if (!state.f1Done) {
+        alert('F₁ 교배 버튼을 눌러 실험을 완료하세요.');
+        return;
+      }
       switchTab(3);
     }
 
+    // Chart.js 연동 F₂ 실험
     let chartInstance = null;
     function runF2Experiment(count) {
       for (let i = 0; i < count; i++) {
-        Math.random() < 0.75 ? state.f2Dominant++ : state.f2Recessive++;
+        // 3:1 멘델 분리비 유전자 시뮬레이션
+        if (Math.random() < 0.75) {
+          state.f2Dominant++;
+        } else {
+          state.f2Recessive++;
+        }
       }
       state.f2Count += count;
-      
+      updateChart();
+    }
+
+    function updateChart() {
       const ctx = document.getElementById('f2Chart').getContext('2d');
       if (chartInstance) chartInstance.destroy();
+
       chartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: ['우성 표현형', '열성 표현형'],
-          datasets: [{ label: `총 개체 수 (${state.f2Count}회)`, data: [state.f2Dominant, state.f2Recessive], backgroundColor: ['#4299e1', '#f6ad55'] }]
+          datasets: [{
+            label: `총 개체 수 (${state.f2Count}회)`,
+            data: [state.f2Dominant, state.f2Recessive],
+            backgroundColor: ['#4299e1', '#f6ad55']
+          }]
         },
-        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
+        }
       });
     }
 
-    // Cloud Function을 통해 안전하게 AI 평가 및 저장 수행
-    async function submitResult() {
+    // [보완점 반영] Firebase Firestore로 데이터 제출
+    async function submitToFirebase() {
       const conclusion = document.getElementById('finalConclusion').value;
-      if (!conclusion.trim()) return alert('결론 분석을 작성하세요.');
+      if (!conclusion.trim()) {
+        alert('결론 분석 내용을 작성해 주세요.');
+        return;
+      }
 
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = '안전하게 제출 및 평가 중...';
-
-      const payload = {
-        trait: state.trait,
-        hypothesis: state.hypothesis,
-        f2TotalCount: state.f2Count,
-        f2Dominant: state.f2Dominant,
-        f2Recessive: state.f2Recessive,
-        conclusion: conclusion
-      };
+      if (!window.db) {
+        alert('Firebase 초기화 중입니다. 잠시 후 다시 시도해 주세요.');
+        return;
+      }
 
       try {
-        const response = await fetch(FUNCTION_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+        await window.firebaseAddDoc(window.firebaseCollection(window.db, "submissions"), {
+          trait: state.trait,
+          hypothesis: state.hypothesis,
+          f2TotalCount: state.f2Count,
+          f2Dominant: state.f2Dominant,
+          f2Recessive: state.f2Recessive,
+          conclusion: conclusion,
+          createdAt: window.firebaseServerTimestamp()
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-          alert(`제출 완료!\n\n[AI 평가 결과]\n- 달성 수준: ${result.level}\n- 피드백: ${result.feedback}`);
-          showToast('제출이 완료되었습니다.');
-        } else {
-          throw new Error(result.error || '제출 처리 중 오류 발생');
-        }
+        showToast('Firestore에 성공적으로 제출되었습니다.');
       } catch (e) {
-        console.error(e);
-        alert('오류 발생: ' + e.message);
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = '최종 결과 제출 및 AI 평가';
+        console.error("제출 오류: ", e);
+        alert('제출 중 오류가 발생했습니다: ' + e.message);
       }
     }
   </script>
