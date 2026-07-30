@@ -9,7 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script>
-    // 제공된 Firebase 설정
+    // Firebase 설정
     const firebaseConfig = {
       apiKey: "AIzaSyDB0HVH6kPrdGk0YaWcSoK3KmP9LvbJml8",
       authDomain: "mendel-lab.firebaseapp.com",
@@ -73,9 +73,7 @@
           문제 <span id="gameProgress" class="text-emerald-600 text-lg font-bold">1</span> / 7 <br>
           <span class="inline-block mt-2 text-lg">다음 중 <strong id="gameQuestion" class="text-emerald-700 underline decoration-2 underline-offset-4">씨의 색깔</strong>의 대립형질 짝은 무엇일까요?</span>
         </p>
-        <div id="gameOptions" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-lg mx-auto">
-          <!-- 버튼이 JS로 생성됨 -->
-        </div>
+        <div id="gameOptions" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-lg mx-auto"></div>
         <p id="gameFeedback" class="mt-4 text-sm font-bold h-5 transition-colors"></p>
       </div>
 
@@ -95,19 +93,33 @@
       <div class="mb-5">
         <label class="block text-xs font-semibold text-slate-700 mb-2">교배 시뮬레이션을 진행할 형질을 선택하세요:</label>
         <select id="traitSelect" onchange="updateTraitSelection()" class="w-full md:w-1/2 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium bg-slate-50 cursor-pointer">
-          <!-- 옵션 JS 렌더링 -->
         </select>
       </div>
 
-      <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 mb-5">
-        <p class="text-sm text-slate-700 leading-relaxed" id="hypothesisGuide">
-          순종 <strong class="text-emerald-700">노란색</strong> 완두콩(YY)과 순종 <strong class="text-emerald-700">초록색</strong> 완두콩(yy)을 교배하여 얻은 잡종 1대(Yy)끼리 자가 교배할 때, 자손 2대(F2)의 완두콩 <strong class="text-emerald-700">씨의 색깔</strong>은 어떻게 나타날까요?
-        </p>
+      <div class="space-y-3 mb-6">
+        <div class="flex items-center gap-2">
+          <span class="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">3-1</span>
+          <label class="text-xs font-semibold text-slate-700">나만의 가설 — 잡종 1대(F1) 예측</label>
+        </div>
+        <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+          <p class="text-sm text-slate-700 leading-relaxed" id="hypothesisGuideF1">
+            가이드 텍스트
+          </p>
+        </div>
+        <textarea id="hypothesisF1" oninput="checkF1Input()" rows="3" placeholder="순종끼리 교배한 자손 1대(F1)에서는 어떤 형질이 나타날까요? 그렇게 생각한 이유도 함께 적어보세요." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
       </div>
-      
-      <div class="space-y-3">
-        <label class="block text-xs font-semibold text-slate-700">예상하는 자손 2대(F2) 색깔 비율 및 결과 가설:</label>
-        <textarea id="hypothesis" rows="3" placeholder="예: 우성과 열성이 약 3:1의 비율로 나올 것이다. 왜냐하면..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
+
+      <div id="step3bBlock" class="space-y-3 opacity-40 pointer-events-none transition-opacity duration-500">
+        <div class="flex items-center gap-2">
+          <span class="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">3-2</span>
+          <label class="text-xs font-semibold text-slate-700">나만의 가설 — 잡종 2대(F2) 비율 예측</label>
+        </div>
+        <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+          <p class="text-sm text-slate-700 leading-relaxed" id="hypothesisGuideF2">
+            가이드 텍스트
+          </p>
+        </div>
+        <textarea id="hypothesisF2" rows="3" placeholder="F1끼리 자가교배한 자손 2대(F2)의 형질 비율은 어떨까요? 왜 그렇게 예상하나요?" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
       </div>
     </section>
 
@@ -116,9 +128,8 @@
         <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold">Step 4</span>
         잡종 2대(F2) 자가 교배 시뮬레이션
       </h2>
-      <p class="text-xs text-slate-500 mb-5" id="simulationGuide">어버이 F1(Yy) × F1(Yy) 교배를 직접 실행하여 표본 크기(교배 횟수)에 따른 통계적 분리 비율을 관찰해 보세요.</p>
+      <p class="text-xs text-slate-500 mb-5" id="simulationGuide">교배 횟수에 따른 통계적 분리 비율을 관찰해 보세요.</p>
 
-      <!-- 교배 버튼 그룹 -->
       <div class="flex flex-wrap gap-2 mb-6">
         <button onclick="runSimulation(1)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition shadow-sm">+1회 교배</button>
         <button onclick="runSimulation(10)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition shadow-sm">+10회 교배</button>
@@ -127,31 +138,29 @@
         <button onclick="resetSimulation()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium px-4 py-2.5 rounded-xl transition ml-auto">초기화</button>
       </div>
 
-      <!-- 통계 현황판 -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div id="boxDom" class="p-4 rounded-xl border bg-amber-50 border-amber-200 text-center transition-colors">
-          <div id="labelDom" class="text-xs font-medium text-slate-700 mb-1">🟡 노란색 (YY, Yy)</div>
+          <div id="labelDom" class="text-xs font-medium text-slate-700 mb-1">우성</div>
           <div id="countDom" class="text-2xl font-black text-amber-600 transition-colors">0</div>
         </div>
         <div id="boxRec" class="p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-center transition-colors">
-          <div id="labelRec" class="text-xs font-medium text-slate-700 mb-1">🟢 초록색 (yy)</div>
+          <div id="labelRec" class="text-xs font-medium text-slate-700 mb-1">열성</div>
           <div id="countRec" class="text-2xl font-black text-emerald-600 transition-colors">0</div>
         </div>
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
-          <div class="text-xs text-slate-600 font-medium mb-1">총 교배 개체 수</div>
+          <div class="text-xs text-slate-600 font-medium mb-1">총 개체 수</div>
           <div id="countTotal" class="text-2xl font-black text-slate-700">0</div>
         </div>
         <div class="bg-teal-50 p-4 rounded-xl border border-teal-200 text-center">
-          <div class="text-xs text-teal-800 font-medium mb-1">표현형 비율 (우성 : 열성)</div>
+          <div class="text-xs text-teal-800 font-medium mb-1">비율 (우:열)</div>
           <div id="ratioDisplay" class="text-xl font-bold text-teal-700">- : -</div>
         </div>
       </div>
 
-      <!-- 시각적 프로그래스 바 -->
       <div class="space-y-2">
         <div class="flex justify-between text-xs text-slate-600 font-semibold px-1">
-          <span id="nameDom">노란색 비율: <strong id="pctDom" class="text-sm ml-1">0% (0.00)</strong></span>
-          <span id="nameRec">초록색 비율: <strong id="pctRec" class="text-sm ml-1">0% (0.00)</strong></span>
+          <span id="nameDom">우성 비율: <strong id="pctDom" class="text-sm ml-1">0% (0.00)</strong></span>
+          <span id="nameRec">열성 비율: <strong id="pctRec" class="text-sm ml-1">0% (0.00)</strong></span>
         </div>
         <div class="w-full h-5 bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
           <div id="barDom" class="bg-amber-400 h-full transition-all duration-300 flex items-center justify-center text-[10px] text-white font-bold" style="width: 50%;"></div>
@@ -163,40 +172,34 @@
     <section id="step5Section" class="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 opacity-50 pointer-events-none transition-opacity duration-500">
       <h2 class="text-lg font-bold text-emerald-900 mb-4 flex items-center gap-2">
         <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold">Step 5</span>
-        멘델의 고민 따라가기 (유도 질문)
+        멘델의 고민 따라가기
       </h2>
-      <p class="text-xs text-slate-500 mb-5">멘델은 위와 같은 실험 결과를 얻고 깊은 고민에 빠졌습니다. 멘델의 입장이 되어 유도 질문에 답해보고 그의 위대한 가설을 확인해 보세요.</p>
-
       <div class="space-y-4">
-        <!-- 고민 1: 우열의 원리 유도 -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div class="flex items-start gap-3 mb-3">
             <div class="text-2xl mt-1">🤔</div>
             <div>
-              <h3 class="text-sm font-bold text-slate-800 leading-snug">고민 1. 순종끼리 교배한 잡종 1대(F1)에서는 왜 한 가지 형질만 나타났을까?</h3>
-              <p class="text-xs text-slate-600 mt-1">부모가 물려준 열성 형질(예: 초록색)은 자손에게 전달되지 않고 완전히 파괴되어 사라진 것일까?</p>
+              <h3 class="text-sm font-bold text-slate-800 leading-snug">고민 1. 잡종 1대(F1)에서는 왜 한 가지 형질만 나타났을까?</h3>
+              <p class="text-xs text-slate-600 mt-1">열성 형질은 사라진 것일까?</p>
             </div>
           </div>
           <button onclick="document.getElementById('mendelIdea1').classList.toggle('hidden')" class="ml-10 text-xs bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1.5 rounded-lg font-medium transition shadow-sm">멘델의 가설 확인하기 💡</button>
           <div id="mendelIdea1" class="hidden mt-3 ml-10 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
             <p class="text-sm font-bold text-emerald-800">📌 우열의 원리</p>
-            <p class="text-xs text-slate-700 mt-1 leading-relaxed">아니다! 열성 형질은 사라지지 않고 전달되었다. <br><strong>한 쌍의 대립 유전 인자가 서로 다를 때, 하나의 인자(우성)만 겉으로 표현되고 다른 인자(열성)는 가려질 뿐이다.</strong></p>
+            <p class="text-xs text-slate-700 mt-1 leading-relaxed">아니다! 열성 형질은 가려졌을 뿐이다. 한 쌍의 대립유전자가 서로 다를 때 하나의 형질만 표현된다.</p>
           </div>
         </div>
-
-        <!-- 고민 2: 분리의 법칙 유도 -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div class="flex items-start gap-3 mb-3">
             <div class="text-2xl mt-1">🧐</div>
             <div>
-              <h3 class="text-sm font-bold text-slate-800 leading-snug">고민 2. 잡종 2대(F2)에서 3:1 비율로 열성 형질이 부활한 이유는 무엇일까?</h3>
-              <p class="text-xs text-slate-600 mt-1">유전 물질이 물감처럼 섞여버렸다면, 어떻게 섞인 물감에서 다시 원래 색이 명확하게 분리되어 나올 수 있을까?</p>
+              <h3 class="text-sm font-bold text-slate-800 leading-snug">고민 2. 잡종 2대(F2)에서 왜 3:1 비율로 열성 형질이 부활했을까?</h3>
             </div>
           </div>
           <button onclick="document.getElementById('mendelIdea2').classList.toggle('hidden')" class="ml-10 text-xs bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1.5 rounded-lg font-medium transition shadow-sm">멘델의 가설 확인하기 💡</button>
           <div id="mendelIdea2" class="hidden mt-3 ml-10 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-            <p class="text-sm font-bold text-emerald-800">📌 유전 인자의 존재 & 분리의 법칙</p>
-            <p class="text-xs text-slate-700 mt-1 leading-relaxed">유전 물질은 섞이는 것이 아니라 '인자(Factor)' 형태로 존재한다! <br><strong>쌍을 이루는 유전 인자는 생식세포를 형성할 때 섞이지 않고 분리되어 서로 다른 생식세포로 들어간다.</strong></p>
+            <p class="text-sm font-bold text-emerald-800">📌 분리의 법칙</p>
+            <p class="text-xs text-slate-700 mt-1 leading-relaxed">유전 물질은 섞이지 않는다! 쌍을 이루는 유전 인자는 생식세포 형성 시 분리되어 들어간다.</p>
           </div>
         </div>
       </div>
@@ -205,37 +208,21 @@
     <section id="step6Section" class="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 space-y-6 opacity-50 pointer-events-none transition-opacity duration-500">
       <h2 class="text-lg font-bold text-emerald-900 flex items-center gap-2">
         <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold">Step 6</span>
-        탐구 결과 해석 및 정리
+        탐구 결과 정리 및 제출
       </h2>
-
-      <!-- 질문 1 -->
       <div class="space-y-2">
-        <label class="block text-sm font-semibold text-slate-800 leading-relaxed">
-          Q1. [가설 비교 및 데이터 분석] 시뮬레이션 결과(표본 크기에 따른 비율 변화)는 본인이 세운 가설과 일치하나요? 수집된 통계 수치를 근거로 비교·설명해 보세요.
-        </label>
-        <textarea id="q1Answer" rows="4" placeholder="교배 횟수를 늘릴수록 분리 비율이 어떻게 변했는지 통계 수치를 바탕으로 설명하세요." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
+        <label class="block text-sm font-semibold text-slate-800">Q1. 실험 데이터 분석 (가설 비교)</label>
+        <textarea id="q1Answer" rows="4" placeholder="시뮬레이션 결과가 가설과 일치하는지 통계 수치를 근거로 설명하세요." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
       </div>
-
-      <!-- 질문 2 -->
       <div class="space-y-2">
-        <label class="block text-sm font-semibold text-slate-800 leading-relaxed">
-          Q2. [유전 원리 개념 적용] 이 실험 결과를 바탕으로 '우열의 원리'와 '분리 법칙'의 개념을 대립유전자의 행동(감수 분열과 수정 과정)과 연결하여 설명해 보세요.
-        </label>
-        <textarea id="q2Answer" rows="4" placeholder="대립유전자가 생식세포 형성 시 분리되고 수정 시 다시 쌍을 이루는 과정과 연결해 설명하세요." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
+        <label class="block text-sm font-semibold text-slate-800">Q2. 유전 원리 적용 (우열/분리)</label>
+        <textarea id="q2Answer" rows="4" placeholder="우열의 원리와 분리 법칙을 유전자의 행동과 연결해 설명하세요." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
       </div>
-
-      <!-- 제출 버튼 -->
-      <div class="pt-4">
-        <button onclick="submitData()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition flex justify-center items-center gap-2 text-base">
-          <span>🚀</span> 최종 탐구 보고서 제출하기
-        </button>
-      </div>
+      <button onclick="submitData()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg transition">🚀 최종 탐구 보고서 제출하기</button>
     </section>
-
   </main>
 
   <script>
-    // 멘델의 7가지 대립형질 메타 데이터
     const mendelTraits = [
       { category: "씨의 색깔", dom: "노란색", rec: "초록색", domA: "Y", recA: "y", iconD: "🟡", iconR: "🟢", colorD: "text-amber-600", colorR: "text-emerald-600", bgD: "bg-amber-400", bgR: "bg-emerald-500", boxD: "bg-amber-50 border-amber-200", boxR: "bg-emerald-50 border-emerald-200" },
       { category: "씨의 모양", dom: "둥근 모양", rec: "주름진 모양", domA: "R", recA: "r", iconD: "🟢", iconR: "〰️", colorD: "text-emerald-700", colorR: "text-lime-700", bgD: "bg-emerald-400", bgR: "bg-lime-500", boxD: "bg-emerald-50 border-emerald-200", boxR: "bg-lime-50 border-lime-200" },
@@ -246,218 +233,103 @@
       { category: "줄기의 키", dom: "큰 키", rec: "작은 키", domA: "T", recA: "t", iconD: "🌲", iconR: "🌱", colorD: "text-cyan-600", colorR: "text-lime-600", bgD: "bg-cyan-500", bgR: "bg-lime-500", boxD: "bg-cyan-50 border-cyan-200", boxR: "bg-lime-50 border-lime-200" }
     ];
 
-    // 시뮬레이션 상태
-    let domCount = 0;
-    let recCount = 0;
-    let currentTraitIndex = 0;
+    let domCount = 0, recCount = 0, gameStep = 0;
     let currentTrait = mendelTraits[0];
+    let gameQuestions = [...mendelTraits].sort(() => Math.random() - 0.5);
 
-    // 미니게임 상태
-    let gameStep = 0;
-    let gameQuestions = [...mendelTraits].sort(() => Math.random() - 0.5); // 셔플
-
-    window.onload = function() {
-      initSelectOptions();
-      loadGameQuestion();
-    };
+    window.onload = () => { initSelectOptions(); loadGameQuestion(); };
 
     function loadGameQuestion() {
-      if (gameStep >= 7) {
-        completeGame();
-        return;
+      if (gameStep >= 7) { 
+        document.getElementById('gameContainer').classList.add('hidden');
+        document.getElementById('gameComplete').classList.remove('hidden');
+        document.querySelectorAll('section').forEach(s => s.classList.remove('opacity-50', 'pointer-events-none'));
+        return; 
       }
       const q = gameQuestions[gameStep];
       document.getElementById('gameProgress').innerText = gameStep + 1;
       document.getElementById('gameQuestion').innerText = q.category;
-
-      // 오답 보기 생성 (현재 문제를 제외한 형질 중 3개 랜덤 추출)
-      let wrongOptions = mendelTraits.filter(t => t.category !== q.category)
-                                     .sort(() => Math.random() - 0.5)
-                                     .slice(0, 3)
-                                     .map(t => `${t.dom} / ${t.rec}`);
-      
-      const correctOption = `${q.dom} / ${q.rec}`;
-      let allOptions = [...wrongOptions, correctOption].sort(() => Math.random() - 0.5);
-
-      const optionsDiv = document.getElementById('gameOptions');
-      optionsDiv.innerHTML = '';
-      allOptions.forEach(opt => {
+      let wrong = mendelTraits.filter(t => t.category !== q.category).sort(() => Math.random() - 0.5).slice(0, 3).map(t => `${t.dom} / ${t.rec}`);
+      let all = [...wrong, `${q.dom} / ${q.rec}`].sort(() => Math.random() - 0.5);
+      const optDiv = document.getElementById('gameOptions');
+      optDiv.innerHTML = '';
+      all.forEach(opt => {
         const btn = document.createElement('button');
-        btn.className = "bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 text-slate-700 text-sm font-medium py-3 px-4 rounded-xl shadow-sm transition-all";
+        btn.className = "bg-white border border-slate-200 hover:border-emerald-500 p-3 rounded-xl text-sm font-medium transition";
         btn.innerText = opt;
-        btn.onclick = () => checkGameAnswer(opt, correctOption);
-        optionsDiv.appendChild(btn);
+        btn.onclick = () => {
+          if (opt === `${q.dom} / ${q.rec}`) { gameStep++; loadGameQuestion(); }
+          else document.getElementById('gameFeedback').innerText = "오답입니다! 다시 시도하세요.";
+        };
+        optDiv.appendChild(btn);
       });
-      document.getElementById('gameFeedback').innerText = '';
-    }
-
-    function checkGameAnswer(selected, correct) {
-      const feedback = document.getElementById('gameFeedback');
-      if (selected === correct) {
-        feedback.innerText = "정답입니다! 👏";
-        feedback.className = "mt-4 text-sm font-bold h-5 text-emerald-600";
-        gameStep++;
-        setTimeout(loadGameQuestion, 800);
-      } else {
-        feedback.innerText = "오답입니다. 다시 골라보세요! 😅";
-        feedback.className = "mt-4 text-sm font-bold h-5 text-red-500";
-      }
-    }
-
-    function completeGame() {
-      document.getElementById('gameContainer').classList.add('hidden');
-      document.getElementById('gameComplete').classList.remove('hidden');
-      
-      // 다음 스텝 잠금 해제 (step5, step6 추가)
-      document.getElementById('step3Section').classList.remove('opacity-50', 'pointer-events-none');
-      document.getElementById('step4Section').classList.remove('opacity-50', 'pointer-events-none');
-      document.getElementById('step5Section').classList.remove('opacity-50', 'pointer-events-none');
-      document.getElementById('step6Section').classList.remove('opacity-50', 'pointer-events-none');
     }
 
     function initSelectOptions() {
       const select = document.getElementById('traitSelect');
-      mendelTraits.forEach((t, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.text = `${t.category} (${t.dom} / ${t.rec})`;
-        select.appendChild(option);
-      });
-      updateTraitSelection(); // 초기화
+      mendelTraits.forEach((t, i) => { select.innerHTML += `<option value="${i}">${t.category} (${t.dom} / ${t.rec})</option>`; });
+      updateTraitSelection();
     }
 
     function updateTraitSelection() {
-      const select = document.getElementById('traitSelect');
-      currentTraitIndex = select.value;
-      currentTrait = mendelTraits[currentTraitIndex];
-
-      // 가설 문구 업데이트
-      const guide = document.getElementById('hypothesisGuide');
-      guide.innerHTML = `순종 <strong class="text-emerald-700">${currentTrait.dom}</strong> 완두콩(${currentTrait.domA}${currentTrait.domA})과 순종 <strong class="text-emerald-700">${currentTrait.rec}</strong> 완두콩(${currentTrait.recA}${currentTrait.recA})을 교배하여 얻은 잡종 1대(${currentTrait.domA}${currentTrait.recA})끼리 자가 교배할 때, 자손 2대(F2)의 완두콩 <strong class="text-emerald-700">${currentTrait.category}</strong> 형질은 어떻게 나타날까요?`;
-
-      // 시뮬레이터 안내 문구 업데이트
-      document.getElementById('simulationGuide').innerText = `어버이 F1(${currentTrait.domA}${currentTrait.recA}) × F1(${currentTrait.domA}${currentTrait.recA}) 교배를 직접 실행하여 표본 크기(교배 횟수)에 따른 통계적 분리 비율을 관찰해 보세요.`;
-
-      // 시뮬레이터 UI 디자인 업데이트
-      document.getElementById('labelDom').innerText = `${currentTrait.iconD} ${currentTrait.dom} (${currentTrait.domA}${currentTrait.domA}, ${currentTrait.domA}${currentTrait.recA})`;
-      document.getElementById('labelRec').innerText = `${currentTrait.iconR} ${currentTrait.rec} (${currentTrait.recA}${currentTrait.recA})`;
-      
-      document.getElementById('nameDom').innerHTML = `${currentTrait.dom} 비율: <strong id="pctDom" class="text-sm ml-1">0% (0.00)</strong>`;
-      document.getElementById('nameRec').innerHTML = `${currentTrait.rec} 비율: <strong id="pctRec" class="text-sm ml-1">0% (0.00)</strong>`;
-
-      document.getElementById('boxDom').className = `p-4 rounded-xl border text-center transition-colors ${currentTrait.boxD}`;
-      document.getElementById('boxRec').className = `p-4 rounded-xl border text-center transition-colors ${currentTrait.boxR}`;
-      
-      document.getElementById('countDom').className = `text-2xl font-black transition-colors ${currentTrait.colorD}`;
-      document.getElementById('countRec').className = `text-2xl font-black transition-colors ${currentTrait.colorR}`;
-
-      document.getElementById('barDom').className = `h-full transition-all duration-300 flex items-center justify-center text-[10px] text-white font-bold ${currentTrait.bgD}`;
-      document.getElementById('barRec').className = `h-full transition-all duration-300 flex items-center justify-center text-[10px] text-white font-bold ${currentTrait.bgR}`;
-
-      // 교배 리셋
+      currentTrait = mendelTraits[document.getElementById('traitSelect').value];
+      document.getElementById('hypothesisGuideF1').innerHTML = `순종 ${currentTrait.dom}(${currentTrait.domA}${currentTrait.domA})과 순종 ${currentTrait.rec}(${currentTrait.recA}${currentTrait.recA})을 교배하면, 잡종 1대(F1)는 어떤 형질이 나타날까요?`;
+      document.getElementById('hypothesisGuideF2').innerHTML = `잡종 1대(F1)끼리 자가 교배하면, 자손 2대(F2)의 ${currentTrait.category} 형질 비율은 어떻게 나타날까요?`;
+      document.getElementById('labelDom').innerText = `${currentTrait.iconD} ${currentTrait.dom}`;
+      document.getElementById('labelRec').innerText = `${currentTrait.iconR} ${currentTrait.rec}`;
+      checkF1Input();
       resetSimulation();
+    }
+
+    function checkF1Input() {
+      const filled = document.getElementById('hypothesisF1').value.trim().length > 0;
+      const block = document.getElementById('step3bBlock');
+      block.classList.toggle('opacity-40', !filled);
+      block.classList.toggle('pointer-events-none', !filled);
     }
 
     function runSimulation(times) {
       for (let i = 0; i < times; i++) {
-        // 생식세포 무작위 분리
         const allele1 = Math.random() < 0.5 ? currentTrait.domA : currentTrait.recA;
         const allele2 = Math.random() < 0.5 ? currentTrait.domA : currentTrait.recA;
-        
-        // 열성(순종)만 열성 발현, 그 외는 우성 발현
-        if (allele1 === currentTrait.recA && allele2 === currentTrait.recA) {
-          recCount++;
-        } else {
-          domCount++;
-        }
+        if (allele1 === currentTrait.recA && allele2 === currentTrait.recA) recCount++;
+        else domCount++;
       }
       updateUI();
     }
 
-    function resetSimulation() {
-      domCount = 0;
-      recCount = 0;
-      updateUI();
-    }
+    function resetSimulation() { domCount = 0; recCount = 0; updateUI(); }
 
     function updateUI() {
       const total = domCount + recCount;
       document.getElementById('countDom').innerText = domCount.toLocaleString();
       document.getElementById('countRec').innerText = recCount.toLocaleString();
       document.getElementById('countTotal').innerText = total.toLocaleString();
-
       if (total > 0) {
-        const domRatio = (domCount / recCount).toFixed(2);
-        document.getElementById('ratioDisplay').innerText = `${domRatio} : 1`;
-
-        const domPct = ((domCount / total) * 100).toFixed(1);
-        const recPct = ((recCount / total) * 100).toFixed(1);
-
-        // 괄호 안에 비율(소수점 2자리) 표시
-        document.getElementById('pctDom').innerText = `${domPct}% (${domRatio})`;
-        document.getElementById('pctRec').innerText = `${recPct}% (1.00)`;
-        
-        document.getElementById('barDom').style.width = `${domPct}%`;
-        document.getElementById('barRec').style.width = `${recPct}%`;
-      } else {
-        document.getElementById('ratioDisplay').innerText = `- : -`;
-        document.getElementById('pctDom').innerText = `0% (0.00)`;
-        document.getElementById('pctRec').innerText = `0% (0.00)`;
-        document.getElementById('barDom').style.width = `50%`;
-        document.getElementById('barRec').style.width = `50%`;
+        const ratio = (domCount / (recCount || 1)).toFixed(2);
+        document.getElementById('ratioDisplay').innerText = `${ratio} : 1`;
+        const dPct = ((domCount / total) * 100).toFixed(1);
+        const rPct = ((recCount / total) * 100).toFixed(1);
+        document.getElementById('pctDom').innerHTML = `${dPct}% (${(domCount/recCount || 0).toFixed(2)})`;
+        document.getElementById('pctRec').innerHTML = `${rPct}% (1.00)`;
+        document.getElementById('barDom').style.width = `${dPct}%`;
+        document.getElementById('barRec').style.width = `${rPct}%`;
       }
     }
 
     function submitData() {
-      const studentId = document.getElementById('studentId').value.trim();
-      const studentName = document.getElementById('studentName').value.trim();
-      const hypothesis = document.getElementById('hypothesis').value.trim();
-      const q1Answer = document.getElementById('q1Answer').value.trim();
-      const q2Answer = document.getElementById('q2Answer').value.trim();
-
-      if (!studentId || !studentName) {
-        alert('학번과 이름을 입력해주세요.');
-        return;
-      }
-      if (gameStep < 7) {
-        alert('미니게임을 먼저 완료해야 제출할 수 있습니다.');
-        return;
-      }
-      if (!hypothesis || !q1Answer || !q2Answer) {
-        alert('모든 가설 및 탐구 질문 질문 답안을 입력해 주세요.');
-        return;
-      }
-      const total = domCount + recCount;
-      if (total === 0) {
-        alert('교배 시뮬레이션을 최소 1회 이상 실행한 후 제출해주세요.');
-        return;
-      }
-
-      const submissionData = {
-        studentId: studentId,
-        studentName: studentName,
+      const data = {
+        studentId: document.getElementById('studentId').value,
+        studentName: document.getElementById('studentName').value,
         selectedTrait: currentTrait.category,
-        hypothesis: hypothesis,
-        simulationStats: {
-          dominant: domCount,
-          recessive: recCount,
-          total: total,
-          ratio: recCount > 0 ? (domCount / recCount).toFixed(2) : 'N/A'
-        },
-        q1Answer: q1Answer,
-        q2Answer: q2Answer,
-        submittedAt: new Date().toISOString(),
-        teacherEval: null 
+        hypothesisF1: document.getElementById('hypothesisF1').value,
+        hypothesisF2: document.getElementById('hypothesisF2').value,
+        simulationStats: { dominant: domCount, recessive: recCount, total: domCount+recCount, ratio: (domCount/(recCount||1)).toFixed(2) },
+        q1Answer: document.getElementById('q1Answer').value,
+        q2Answer: document.getElementById('q2Answer').value,
+        submittedAt: new Date().toISOString()
       };
-
-      // Realtime DB 저장
-      db.ref('submissions/' + studentId).set(submissionData)
-        .then(() => {
-          alert(`🎉 탐구 보고서가 정상적으로 제출되었습니다!\n학번: ${studentId} | 이름: ${studentName}`);
-        })
-        .catch((error) => {
-          alert('제출 실패: ' + error.message);
-        });
+      db.ref('submissions/' + data.studentId).set(data).then(() => alert("제출 완료!"));
     }
   </script>
 </body>
