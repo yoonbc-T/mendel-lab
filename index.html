@@ -107,6 +107,11 @@
           </p>
         </div>
         <textarea id="hypothesisF1" oninput="checkF1Input()" rows="3" placeholder="순종끼리 교배한 자손 1대(F1)에서는 어떤 형질이 나타날까요? 그렇게 생각한 이유도 함께 적어보세요." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
+        <button onclick="document.getElementById('revealF1Answer').classList.toggle('hidden')" class="text-xs bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1.5 rounded-lg font-medium transition shadow-sm">🔍 실제 결과 확인하기</button>
+        <div id="revealF1Answer" class="hidden p-4 bg-teal-50 border border-teal-200 rounded-xl">
+          <p class="text-sm font-bold text-teal-800">📊 실제로는 이렇게 나온답니다!</p>
+          <p class="text-xs text-slate-700 mt-1 leading-relaxed" id="revealF1Text"></p>
+        </div>
       </div>
 
       <div id="step3bBlock" class="space-y-3 opacity-40 pointer-events-none transition-opacity duration-500">
@@ -120,6 +125,11 @@
           </p>
         </div>
         <textarea id="hypothesisF2" rows="3" placeholder="F1끼리 자가교배한 자손 2대(F2)의 형질 비율은 어떨까요? 왜 그렇게 예상하나요?" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
+        <button onclick="document.getElementById('revealF2Answer').classList.toggle('hidden')" class="text-xs bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1.5 rounded-lg font-medium transition shadow-sm">🔍 실제 결과 확인하기</button>
+        <div id="revealF2Answer" class="hidden p-4 bg-teal-50 border border-teal-200 rounded-xl">
+          <p class="text-sm font-bold text-teal-800">📊 실제로는 이렇게 나온답니다!</p>
+          <p class="text-xs text-slate-700 mt-1 leading-relaxed" id="revealF2Text"></p>
+        </div>
       </div>
     </section>
 
@@ -307,6 +317,10 @@
       currentTrait = mendelTraits[document.getElementById('traitSelect').value];
       document.getElementById('hypothesisGuideF1').innerHTML = `순종 ${currentTrait.dom}(${currentTrait.domA}${currentTrait.domA})과 순종 ${currentTrait.rec}(${currentTrait.recA}${currentTrait.recA})을 교배하면, 잡종 1대(F1)는 어떤 형질이 나타날까요?`;
       document.getElementById('hypothesisGuideF2').innerHTML = `잡종 1대(F1)끼리 자가 교배하면, 자손 2대(F2)의 ${currentTrait.category} 형질 비율은 어떻게 나타날까요?`;
+      document.getElementById('revealF1Text').innerHTML = `F1(잡종 1대)에서는 <strong>${currentTrait.iconD} ${currentTrait.dom}</strong>만 나타납니다! ${currentTrait.iconR} ${currentTrait.rec}(열성) 형질은 사라진 게 아니라 가려져 있을 뿐이에요.`;
+      document.getElementById('revealF2Text').innerHTML = `F2(잡종 2대)에서는 <strong>${currentTrait.iconD} ${currentTrait.dom} : ${currentTrait.iconR} ${currentTrait.rec} = 3 : 1</strong> 비율로 나타납니다. 가려져 있던 열성 형질이 다시 나타나는 거예요!`;
+      document.getElementById('revealF1Answer').classList.add('hidden');
+      document.getElementById('revealF2Answer').classList.add('hidden');
       document.getElementById('labelDom').innerText = `${currentTrait.iconD} ${currentTrait.dom}`;
       document.getElementById('labelRec').innerText = `${currentTrait.iconR} ${currentTrait.rec}`;
       checkF1Input();
