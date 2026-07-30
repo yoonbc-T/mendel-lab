@@ -1,56 +1,196 @@
-<!doctype html><html lang="ko"><head><base target="_top"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<style>
-body{font-family:Pretendard,"Noto Sans KR",system-ui,sans-serif;background:#f8fafc;color:#0f172a}.card{background:#fff;border:1px solid #e2e8f0;border-radius:22px;box-shadow:0 10px 30px rgba(15,23,42,.06)}.tab.active{background:#7c3aed;color:#fff}.pea{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;box-shadow:inset -8px -9px 10px rgba(0,0,0,.12)}.round{background:#facc15}.wrinkle{background:#84cc16;border-radius:42% 58% 45% 55%}.hidden{display:none!important}textarea{resize:vertical}.trait-grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:12px}@media(min-width:640px){.trait-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(min-width:1024px){.trait-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}.trait-card{text-align:left;border:2px solid #e2e8f0;border-radius:20px;background:white;padding:16px;transition:.18s ease;box-shadow:0 4px 14px rgba(15,23,42,.04)}.trait-card:hover{transform:translateY(-2px);border-color:#a78bfa}.trait-card.selected{border-color:#7c3aed;background:#f5f3ff;box-shadow:0 0 0 3px rgba(124,58,237,.12)}.trait-photo{height:96px;border-radius:16px;background:linear-gradient(135deg,#ecfccb,#fef9c3);display:flex;align-items:center;justify-content:center;gap:16px;font-size:40px}.trait-parent-icon{width:74px;height:74px;border-radius:20px;background:white;border:1px solid #e2e8f0;display:grid;place-items:center;font-size:38px;margin:0 auto 8px}
-</style>
-</head><body>
-<header class="bg-white border-b sticky top-0 z-20"><div class="max-w-6xl mx-auto p-4 flex flex-wrap justify-between gap-3"><div><b class="text-emerald-700">중3 과학 · 멘델 유전 탐구</b><h1 class="text-2xl font-black">🌱 Mendel's Lab</h1></div><div class="flex gap-2"><input id="student" class="border rounded-xl px-3 py-2" placeholder="학생 번호"><input id="team" class="border rounded-xl px-3 py-2 w-24" placeholder="모둠"></div></div></header>
-<main class="max-w-6xl mx-auto p-4 pb-20"><section class="bg-gradient-to-r from-violet-700 to-purple-500 text-white rounded-3xl p-6 mb-5"><p class="font-bold">1차시 도입 탐구 질문</p><h2 class="text-2xl md:text-3xl font-black">형질은 왜 다양하게 나타날까?</h2><p class="mt-2">완두콩의 다양한 형질을 관찰하고, 한 쌍의 대립형질을 골라 교배 결과를 예상해 보자.</p></section>
-<nav class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-5"><button class="tab active rounded-xl p-3 font-bold" data-tab="one">1. 형질 관찰</button><button class="tab bg-white border rounded-xl p-3 font-bold" data-tab="two">2. 가설·F₁</button><button class="tab bg-white border rounded-xl p-3 font-bold" data-tab="three">3. F₂ 실험</button><button class="tab bg-white border rounded-xl p-3 font-bold" data-tab="four">4. 해석·AI 평가</button></nav>
-<section id="one" class="panel card p-6">
-  <div class="flex flex-wrap justify-between gap-3"><div><p class="text-violet-700 font-bold">1차시 도입(10분) · 유전 현상 관찰과 문제 제기</p><h3 class="text-2xl font-black">① 다양한 완두콩 형질을 관찰하자</h3></div><span class="rounded-full bg-violet-100 text-violet-800 px-4 py-2 font-bold">도구: 웹앱 사진 자료</span></div>
-  <div class="mt-5 rounded-2xl bg-violet-50 border border-violet-200 p-4"><b>관찰 방법</b><p class="text-slate-700 mt-1">각 카드에서 서로 대비되는 두 형질을 비교하고, 눈에 띄는 한 쌍을 선택하세요. 선택한 형질이 다음 단계의 교배 실험으로 그대로 이어집니다.</p></div>
-  <div id="traitGallery" class="trait-grid mt-5"></div>
-  <div id="selectedTraitBox" class="hidden mt-5 rounded-2xl bg-emerald-50 border border-emerald-200 p-4"><p class="text-sm text-emerald-700 font-bold">내가 선택한 대립형질</p><p id="selectedTraitText" class="text-xl font-black mt-1"></p><p id="selectedTraitReason" class="text-sm text-slate-600 mt-1"></p></div>
-  <label class="block font-bold mt-5">형질이 다양하게 나타나는 원인을 예상해 보자.</label><textarea id="causePrediction" class="w-full border rounded-2xl p-4 mt-2" rows="3" placeholder="예: 어버이에게서 물려받는 정보의 조합이 다르기 때문일 것이다."></textarea>
-  <label class="block font-bold mt-5">선택한 형질에 대해 궁금한 점을 탐구 질문으로 적어 보자.</label><textarea id="memo" class="w-full border rounded-2xl p-4 mt-2" rows="3" placeholder="예: 순종 키 큰 완두와 순종 키 작은 완두를 교배하면 F₁은 어떤 키를 나타낼까?"></textarea>
-  <button id="toHypothesis" class="float-right mt-4 bg-violet-700 text-white rounded-xl px-5 py-3 font-bold">선택한 형질로 가설 세우기 →</button><div class="clear-both"></div>
-</section>
-<section id="two" class="panel card p-6 hidden">
-  <p class="text-emerald-700 font-bold">1~2차시 전개Ⅰ · 가설 설정·실험 설계</p><h3 class="text-2xl font-black">② 선택한 대립형질의 F₁을 예측하자</h3>
-  <div class="mt-5 rounded-3xl bg-slate-50 p-5"><p class="text-sm text-slate-500">관찰 단계에서 선택한 형질</p><p id="f1TraitTitle" class="text-xl font-black mt-1"></p><div id="parentCross" class="flex flex-wrap justify-center items-center gap-5 mt-5 text-center"></div></div>
-  <label class="block font-bold mt-5">나의 가설</label><textarea id="hypothesis" class="w-full border rounded-2xl p-4 mt-2" rows="5" placeholder="F₁에서 어떤 형질이 나타날지, 그렇게 예상한 까닭과 함께 적으세요."></textarea>
-  <div class="mt-5 text-center"><button id="runF1" class="bg-emerald-700 text-white rounded-xl px-6 py-3 font-black">순종 교배 실행</button><div id="f1result" class="mt-5 text-slate-500">가설을 먼저 작성한 뒤 교배를 실행하세요.</div></div>
-  <div class="flex justify-between mt-5"><button class="next border rounded-xl px-5 py-3 font-bold" data-next="one">← 형질 다시 관찰</button><button id="toF2" class="bg-emerald-700 text-white rounded-xl px-5 py-3 font-bold opacity-50" disabled>F₂에서 가설 검증하기 →</button></div>
-</section>
-<section id="three" class="panel card p-6 hidden"><p class="text-emerald-700 font-bold">2~3차시 전개Ⅱ · 실험 수행·결과 해석</p><h3 class="text-2xl font-black">③ F₁ 잡종끼리 대량 자가교배</h3><div class="mt-3 rounded-2xl bg-blue-50 p-4"><b id="f2CrossTitle"></b><p class="text-sm mt-1">관찰 단계에서 선택한 형질로 반복 교배하며, 표본 수가 커질수록 나타나는 규칙성을 찾아보세요.</p></div><div class="grid lg:grid-cols-5 gap-5 mt-5"><div class="lg:col-span-2"><div class="grid grid-cols-2 gap-2"><button class="sim border rounded-xl p-3" data-n="1">+1회</button><button class="sim border rounded-xl p-3" data-n="10">+10회</button><button class="sim border rounded-xl p-3" data-n="100">+100회</button><button class="sim bg-emerald-700 text-white rounded-xl p-3" data-n="500">+500회</button></div><button id="resetSim" class="w-full mt-2 text-sm text-slate-500">결과 초기화</button><div class="grid grid-cols-3 gap-2 text-center mt-4"><div class="bg-yellow-50 rounded-xl p-3"><span id="dominantLabel">우성 형질</span><br><b id="round">0</b></div><div class="bg-lime-50 rounded-xl p-3"><span id="recessiveLabel">열성 형질</span><br><b id="wrinkled">0</b></div><div class="bg-slate-100 rounded-xl p-3">전체<br><b id="total">0</b></div></div><div class="border rounded-2xl p-4 mt-4"><span>관찰 비율</span><p id="ratio" class="text-3xl font-black text-emerald-700">—</p><p id="guide" class="text-sm text-slate-500 mt-2">반복 횟수에 따른 변화를 관찰하세요.</p></div></div><div class="lg:col-span-3 h-80"><canvas id="chart"></canvas></div></div><div class="flex justify-between mt-5"><button class="next border rounded-xl px-5 py-3 font-bold" data-next="two">← F₁ 가설</button><button class="next bg-emerald-700 text-white rounded-xl px-5 py-3 font-bold" data-next="four">나의 해석과 비교하기 →</button></div></section>
-<section id="four" class="panel card p-6 hidden"><p class="text-indigo-700 font-bold">3차시 정리 · 학생 해석과 멘델의 해석 비교</p><h3 class="text-2xl font-black">④ 결과를 근거로 가설과 유전 법칙을 설명하자</h3><div id="summaryBox" class="rounded-2xl bg-slate-50 p-4 mt-5"></div><label class="block font-bold mt-5">문항 1. 결과를 통계적 근거와 함께 나의 가설과 비교하여 설명하시오.</label><textarea id="a1" class="w-full border rounded-2xl p-4 mt-2" rows="5" placeholder="선택한 형질, 시행 횟수, 두 형질의 수와 비율, 가설과의 일치 여부를 포함하세요."></textarea><label class="block font-bold mt-5">문항 2. F₂에서 F₁에 보이지 않던 형질이 다시 나타난 이유를 우열의 원리와 분리 법칙으로 설명하시오.</label><textarea id="a2" class="w-full border rounded-2xl p-4 mt-2" rows="5" placeholder="F₁의 이형접합 유전자형과 생식세포 형성 시 대립유전자의 분리를 연결하세요."></textarea><div class="flex flex-wrap gap-3 mt-5"><button id="grade" class="bg-indigo-700 text-white rounded-xl px-5 py-3 font-black">✨ AI 피드백</button><button id="submit" class="bg-emerald-700 text-white rounded-xl px-5 py-3 font-black">📤 최종 제출</button></div><div id="feedback" class="hidden bg-indigo-50 border border-indigo-200 rounded-2xl p-5 mt-5"><b id="level" class="text-indigo-800"></b><p id="fb" class="mt-3"></p><p id="next" class="mt-3 text-sm"></p></div><p id="status" class="mt-3 text-sm text-slate-500"></p></section></main>
-<script>
-const TRAITS=[
-{id:'seedShape',title:'씨의 모양',dominant:'둥근 씨',recessive:'주름진 씨',symbol:'R',icons:['🟡','🟢'],visual:['둥글고 매끈함','표면에 주름이 있음'],question:'순종 둥근 씨와 순종 주름진 씨를 교배하면 F₁은 어떤 모양일까?'},
-{id:'seedColor',title:'씨의 색깔',dominant:'노란 씨',recessive:'초록 씨',symbol:'Y',icons:['🟡','🟢'],visual:['노란색','초록색'],question:'순종 노란 씨와 순종 초록 씨를 교배하면 F₁은 어떤 색일까?'},
-{id:'flowerColor',title:'꽃의 색깔',dominant:'보라색 꽃',recessive:'흰색 꽃',symbol:'P',icons:['🌸','🌼'],visual:['보라색 꽃','흰색 꽃'],question:'순종 보라색 꽃과 순종 흰색 꽃을 교배하면 F₁의 꽃은 어떤 색일까?'},
-{id:'podShape',title:'꼬투리 모양',dominant:'팽팽한 꼬투리',recessive:'잘록한 꼬투리',symbol:'I',icons:['🫛','〰️'],visual:['팽팽한 모양','씨 사이가 잘록함'],question:'순종 팽팽한 꼬투리와 순종 잘록한 꼬투리를 교배하면 F₁은 어떤 모양일까?'},
-{id:'podColor',title:'꼬투리 색깔',dominant:'초록 꼬투리',recessive:'노란 꼬투리',symbol:'G',icons:['🫛','🟨'],visual:['초록색','노란색'],question:'순종 초록 꼬투리와 순종 노란 꼬투리를 교배하면 F₁은 어떤 색일까?'},
-{id:'flowerPosition',title:'꽃의 위치',dominant:'줄기 옆 꽃',recessive:'줄기 끝 꽃',symbol:'A',icons:['🌿','🌱'],visual:['줄기 옆에 꽃','줄기 끝에 꽃'],question:'순종 줄기 옆 꽃과 순종 줄기 끝 꽃을 교배하면 F₁의 꽃은 어디에 필까?'},
-{id:'stemLength',title:'줄기의 길이',dominant:'키 큰 줄기',recessive:'키 작은 줄기',symbol:'T',icons:['🌳','🌱'],visual:['키가 큼','키가 작음'],question:'순종 키 큰 완두와 순종 키 작은 완두를 교배하면 F₁의 키는 어떨까?'}
-];
-const S={round:0,wrinkled:0,ai:null,trait:null,f1Done:false}; const $=id=>document.getElementById(id);
-let chart=new Chart($('chart'),{type:'bar',data:{labels:['우성 형질','열성 형질'],datasets:[{data:[0,0],backgroundColor:['#facc15','#84cc16'],borderRadius:12}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
-function renderGallery(){ $('traitGallery').innerHTML=TRAITS.map(t=>`<button class="trait-card" data-id="${t.id}"><div class="trait-photo"><span>${t.icons[0]}</span><span class="text-slate-300">↔</span><span>${t.icons[1]}</span></div><p class="font-black mt-3">${t.title}</p><div class="grid grid-cols-2 gap-2 mt-2 text-sm"><span class="rounded-lg bg-yellow-50 p-2">${t.dominant}</span><span class="rounded-lg bg-lime-50 p-2">${t.recessive}</span></div><p class="text-xs text-slate-500 mt-2">${t.visual[0]} / ${t.visual[1]}</p></button>`).join('');document.querySelectorAll('.trait-card').forEach(b=>b.onclick=()=>selectTrait(b.dataset.id));}
-function selectTrait(id){S.trait=TRAITS.find(t=>t.id===id);S.f1Done=false;document.querySelectorAll('.trait-card').forEach(b=>b.classList.toggle('selected',b.dataset.id===id));$('selectedTraitBox').classList.remove('hidden');$('selectedTraitText').textContent=`${S.trait.title}: ${S.trait.dominant} ↔ ${S.trait.recessive}`;$('selectedTraitReason').textContent='이 형질을 다음 단계의 순종 교배와 F₂ 반복 실험에 사용합니다.';if(!$('memo').value.trim())$('memo').value=S.trait.question;updateTraitUI();}
-function updateTraitUI(){if(!S.trait)return;const t=S.trait,s=t.symbol,l=s.toLowerCase();$('f1TraitTitle').textContent=`${t.title}: ${t.dominant} ↔ ${t.recessive}`;$('parentCross').innerHTML=`<div><div class="trait-parent-icon">${t.icons[0]}</div><p class="font-black">순종 ${t.dominant}</p><p class="text-slate-500">${s}${s}</p></div><span class="text-3xl">×</span><div><div class="trait-parent-icon">${t.icons[1]}</div><p class="font-black">순종 ${t.recessive}</p><p class="text-slate-500">${l}${l}</p></div>`;$('f2CrossTitle').textContent=`F₁(${s}${l}) × F₁(${s}${l}) — ${t.title}`;$('dominantLabel').textContent=t.dominant;$('recessiveLabel').textContent=t.recessive;chart.data.labels=[t.dominant,t.recessive];chart.update();}
-function show(id){document.querySelectorAll('.panel').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));if(id==='four')renderSummary();scrollTo({top:0,behavior:'smooth'});} document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{if(b.dataset.tab!=='one'&&!S.trait)return alert('먼저 관찰 단계에서 대립형질을 선택하세요.');show(b.dataset.tab)});document.querySelectorAll('.next').forEach(b=>b.onclick=()=>show(b.dataset.next));
-$('toHypothesis').onclick=()=>{if(!S.trait)return alert('7가지 대립형질 중 한 쌍을 선택하세요.');if(!$('causePrediction').value.trim())return alert('형질이 다양하게 나타나는 원인을 먼저 예상해 보세요.');if(!$('memo').value.trim())return alert('선택한 형질에 대한 탐구 질문을 작성하세요.');updateTraitUI();show('two');};
-$('runF1').onclick=()=>{if(!$('hypothesis').value.trim())return alert('가설을 먼저 작성하세요.');const t=S.trait,s=t.symbol,l=s.toLowerCase();$('f1result').innerHTML=`<div class="flex justify-center gap-2 text-4xl">${Array(5).fill(t.icons[0]).join('')}</div><p class="font-black text-xl mt-3">F₁은 모두 ${t.dominant}, 유전자형은 ${s}${l}</p><p class="mt-2">${t.recessive}의 대립유전자 ${l}은 사라진 것이 아니라 ${s}에 의해 표현되지 않은 상태입니다.</p><div class="mt-3 rounded-xl bg-amber-50 p-3 text-sm"><b>다음 탐구:</b> F₁에서 보이지 않던 ${t.recessive}이 F₂에서 다시 나타날 수 있을까요?</div>`;S.f1Done=true;$('toF2').disabled=false;$('toF2').classList.remove('opacity-50');};
-$('toF2').onclick=()=>{if(!S.f1Done)return alert('순종 교배를 실행하여 F₁ 결과를 먼저 확인하세요.');show('three');};
-document.querySelectorAll('.sim').forEach(b=>b.onclick=()=>{for(let i=0;i<Number(b.dataset.n);i++)Math.random()<.75?S.round++:S.wrinkled++;render();});$('resetSim').onclick=()=>{S.round=S.wrinkled=0;render();};
-function render(){const t=S.round+S.wrinkled;$('round').textContent=S.round;$('wrinkled').textContent=S.wrinkled;$('total').textContent=t;chart.data.datasets[0].data=[S.round,S.wrinkled];chart.update();if(!t){$('ratio').textContent='—';$('guide').textContent='반복 횟수에 따른 변화를 관찰하세요.';return;}const r=S.wrinkled?(S.round/S.wrinkled).toFixed(2)+' : 1':'계산 중';$('ratio').textContent=r;const d=Math.abs(S.round/t-.75);$('guide').textContent=t<30?'표본이 작아 3:1에서 크게 벗어날 수 있습니다. 이것은 실험 오류가 아닙니다.':d<.03?'표본 수가 커지며 이론적 비율 3:1에 매우 가까워졌습니다.':'더 반복하며 전체 비율이 3:1에 가까워지는 경향을 살펴보세요.';}
-function renderSummary(){if(!S.trait)return;const total=S.round+S.wrinkled,ratio=S.wrinkled?(S.round/S.wrinkled).toFixed(2)+' : 1':'—';$('summaryBox').innerHTML=`<p class="font-black">탐구 기록 요약</p><div class="grid md:grid-cols-2 gap-3 mt-2 text-sm"><p><b>선택 형질:</b> ${S.trait.title} (${S.trait.dominant} / ${S.trait.recessive})</p><p><b>F₂ 결과:</b> ${S.trait.dominant} ${S.round}개, ${S.trait.recessive} ${S.wrinkled}개, 총 ${total}개 · ${ratio}</p><p class="md:col-span-2"><b>나의 가설:</b> ${$('hypothesis').value||'미작성'}</p></div>`;}
-function payload(){const t=S.round+S.wrinkled;return{classCode:'SCIENCE3',studentCode:$('student').value.trim(),teamCode:$('team').value.trim(),traitId:S.trait?.id||'',traitTitle:S.trait?.title||'',dominantLabel:S.trait?.dominant||'우성 형질',recessiveLabel:S.trait?.recessive||'열성 형질',symbol:S.trait?.symbol||'R',causePrediction:$('causePrediction').value,questionMemo:$('memo').value,hypothesis:$('hypothesis').value,round:S.round,wrinkled:S.wrinkled,total:t,ratio:S.wrinkled?(S.round/S.wrinkled).toFixed(2)+' : 1':'—',answer1:$('a1').value,answer2:$('a2').value,aiLevel:S.ai?.level||'',aiFeedback:S.ai?.feedback||'',teacherNote:S.ai?.teacher_note||''};}
-function valid(){if(!$('student').value.trim())return alert('학생 번호를 입력하세요.'),false;if(!S.trait)return alert('탐구 형질을 선택하세요.'),false;if(!$('hypothesis').value.trim())return alert('가설을 작성하세요.'),false;if(S.round+S.wrinkled<10)return alert('F₂ 교배를 10회 이상 실행하세요.'),false;if(!$('a1').value.trim()||!$('a2').value.trim())return alert('두 문항을 모두 작성하세요.'),false;return true;}
-const gas=(fn,args=[])=>new Promise((ok,no)=>google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
-$('grade').onclick=async()=>{if(!valid())return;$('status').textContent='AI가 답안의 근거를 확인 중입니다…';try{S.ai=await gas('gradeResponse',[payload()]);$('feedback').classList.remove('hidden');$('level').textContent='성취 수준: '+S.ai.level;$('fb').textContent=S.ai.feedback;$('next').innerHTML='<b>다음 수정 단계:</b> '+S.ai.next_step;$('status').textContent='AI 평가는 초안이며 교사가 최종 검토합니다.';}catch(e){$('status').textContent='오류: '+(e.message||e);}};
-$('submit').onclick=async()=>{if(!valid())return;$('status').textContent='저장 중…';try{const r=await gas('saveLearningRecord',[payload()]);$('status').textContent='✅ 제출 완료: '+new Date(r.savedAt).toLocaleTimeString();}catch(e){$('status').textContent='오류: '+(e.message||e);}};
-renderGallery();
-</script>
-</body></html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>멘델의 유전 법칙 탐구 실험실</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    .tab-nav { display: flex; border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
+    .tab-btn { padding: 12px 24px; border: none; background: none; font-size: 16px; font-weight: bold; color: #666; cursor: pointer; }
+    .tab-btn.active { color: #2b6cb0; border-bottom: 3px solid #2b6cb0; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .card { background: #fafafa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 15px; }
+    .btn { background: #3182ce; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn:hover { background: #2b6cb0; }
+    .btn:disabled { background: #cbd5e0; cursor: not-allowed; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #2d3748; color: white; padding: 12px 20px; border-radius: 6px; display: none; z-index: 1000; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🧬 멘델의 유전 법칙 탐구 실험실</h2>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab(1)">1. 형질 선택 및 가설</button>
+      <button class="tab-btn" onclick="switchTab(2)">2. F₁ 교배 실험</button>
+      <button class="tab-btn" onclick="switchTab(3)">3. F₂ 자가교배 및 분석</button>
+    </div>
+
+    <!-- 1단계 -->
+    <div id="section1" class="section active">
+      <div class="card">
+        <h3>탐구할 대립형질 선택</h3>
+        <select id="traitSelect" onchange="state.trait = this.value">
+          <option value="씨앗 모양">씨앗 모양 (둥근 R / 주름진 r)</option>
+          <option value="씨앗 색깔">씨앗 색깔 (황색 Y / 초록색 y)</option>
+          <option value="꽃 색깔">꽃 색깔 (보라색 P / 흰색 p)</option>
+        </select>
+      </div>
+      <div class="card">
+        <h3>가설 설정</h3>
+        <textarea id="hypothesis" style="width: 100%; height: 80px;" placeholder="예: F1에서는 우성 형질만 나타나고, F2에서는 3:1 비율로 나타날 것이다."></textarea>
+      </div>
+      <button class="btn" onclick="saveStep1()">다음 단계로 (F₁ 실험)</button>
+    </div>
+
+    <!-- 2단계 -->
+    <div id="section2" class="section">
+      <div class="card">
+        <h3>F₁ 잡종 1세대 교배</h3>
+        <button class="btn" onclick="runF1Experiment()">F₁ 교배 실행</button>
+        <div id="f1Result" style="margin-top: 15px; font-weight: bold;"></div>
+      </div>
+      <button class="btn" onclick="saveStep2()">다음 단계로 (F₂ 실험)</button>
+    </div>
+
+    <!-- 3단계 -->
+    <div id="section3" class="section">
+      <div class="card">
+        <h3>F₂ 자가교배 실험 (대량 표본)</h3>
+        <div>
+          <button class="btn" onclick="runF2Experiment(1)">1회</button>
+          <button class="btn" onclick="runF2Experiment(10)">10회</button>
+          <button class="btn" onclick="runF2Experiment(100)">100회</button>
+          <button class="btn" onclick="runF2Experiment(500)">500회</button>
+        </div>
+        <div style="margin-top: 20px;">
+          <canvas id="f2Chart" width="400" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>탐구 결과 분석 및 결론 제출</h3>
+        <textarea id="finalConclusion" style="width: 100%; height: 100px;" placeholder="실험 결과 및 표본 크기에 따른 비율 변화를 포함하여 결론을 작성하세요."></textarea>
+      </div>
+      <button class="btn" id="submitBtn" onclick="submitResult()">최종 결과 제출 및 AI 평가</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // ⚠️ 배포된 Cloud Function URL로 변경하세요.
+    const FUNCTION_URL = "https://us-central1-mendel-lab.cloudfunctions.net/submitAndEvaluate";
+
+    const state = {
+      trait: '씨앗 모양',
+      hypothesis: '',
+      f1Done: false,
+      f2Count: 0,
+      f2Dominant: 0,
+      f2Recessive: 0
+    };
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    function switchTab(step) {
+      if (step === 2 && !state.hypothesis.trim()) return alert('가설을 작성하세요.');
+      if (step === 3 && !state.f1Done) return alert('F₁ 교배를 먼저 진행하세요.');
+
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+      document.getElementById('section' + step).classList.add('active');
+      document.querySelectorAll('.tab-btn')[step - 1].classList.add('active');
+    }
+
+    function saveStep1() {
+      state.hypothesis = document.getElementById('hypothesis').value;
+      if (!state.hypothesis.trim()) return alert('가설을 입력하세요.');
+      switchTab(2);
+    }
+
+    function runF1Experiment() {
+      state.f1Done = true;
+      document.getElementById('f1Result').innerText = `[결론] F₁ 세대 결과: 모든 개체에서 우성 형질만 발현되었습니다.`;
+      showToast('F₁ 교배 완료');
+    }
+
+    function saveStep2() {
+      if (!state.f1Done) return alert('F₁ 교배를 진행하세요.');
+      switchTab(3);
+    }
+
+    let chartInstance = null;
+    function runF2Experiment(count) {
+      for (let i = 0; i < count; i++) {
+        Math.random() < 0.75 ? state.f2Dominant++ : state.f2Recessive++;
+      }
+      state.f2Count += count;
+      
+      const ctx = document.getElementById('f2Chart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['우성 표현형', '열성 표현형'],
+          datasets: [{ label: `총 개체 수 (${state.f2Count}회)`, data: [state.f2Dominant, state.f2Recessive], backgroundColor: ['#4299e1', '#f6ad55'] }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    // Cloud Function을 통해 안전하게 AI 평가 및 저장 수행
+    async function submitResult() {
+      const conclusion = document.getElementById('finalConclusion').value;
+      if (!conclusion.trim()) return alert('결론 분석을 작성하세요.');
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = '안전하게 제출 및 평가 중...';
+
+      const payload = {
+        trait: state.trait,
+        hypothesis: state.hypothesis,
+        f2TotalCount: state.f2Count,
+        f2Dominant: state.f2Dominant,
+        f2Recessive: state.f2Recessive,
+        conclusion: conclusion
+      };
+
+      try {
+        const response = await fetch(FUNCTION_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert(`제출 완료!\n\n[AI 평가 결과]\n- 달성 수준: ${result.level}\n- 피드백: ${result.feedback}`);
+          showToast('제출이 완료되었습니다.');
+        } else {
+          throw new Error(result.error || '제출 처리 중 오류 발생');
+        }
+      } catch (e) {
+        console.error(e);
+        alert('오류 발생: ' + e.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = '최종 결과 제출 및 AI 평가';
+      }
+    }
+  </script>
+</body>
+</html>
