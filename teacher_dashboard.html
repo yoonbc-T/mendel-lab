@@ -78,21 +78,25 @@
         </div>
 
         <!-- 학생 시뮬레이션 수치 요약 -->
-        <div class="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100 grid grid-cols-4 gap-2 text-center">
+        <div class="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100 grid grid-cols-5 gap-2 text-center items-center">
           <div>
-            <div class="text-xs text-emerald-700">노란 완두</div>
-            <div id="statYellow" class="text-base font-bold text-amber-600">-</div>
+            <div class="text-[10px] text-emerald-700 font-bold">탐구 형질</div>
+            <div id="detailTrait" class="text-xs font-bold text-emerald-900 break-keep">-</div>
           </div>
           <div>
-            <div class="text-xs text-emerald-700">초록 완두</div>
-            <div id="statGreen" class="text-base font-bold text-emerald-600">-</div>
+            <div class="text-xs text-emerald-700">우성 개체</div>
+            <div id="statDom" class="text-base font-bold text-amber-600">-</div>
+          </div>
+          <div>
+            <div class="text-xs text-emerald-700">열성 개체</div>
+            <div id="statRec" class="text-base font-bold text-emerald-600">-</div>
           </div>
           <div>
             <div class="text-xs text-emerald-700">총 교배 횟수</div>
             <div id="statTotal" class="text-base font-bold text-slate-700">-</div>
           </div>
           <div>
-            <div class="text-xs text-emerald-700">노란:초록 비율</div>
+            <div class="text-xs text-emerald-700">우성:열성 비율</div>
             <div id="statRatio" class="text-base font-bold text-teal-700">-</div>
           </div>
         </div>
@@ -290,8 +294,10 @@
       document.getElementById('detailStudentId').innerText = `(${item.studentId})`;
       document.getElementById('detailTime').innerText = `제출시간: ${new Date(item.submittedAt).toLocaleString()}`;
 
-      document.getElementById('statYellow').innerText = item.simulationStats.yellow;
-      document.getElementById('statGreen').innerText = item.simulationStats.green;
+      // 7가지 대립형질 지원을 위한 범용 변수 매핑 및 하위 호환 지원
+      document.getElementById('detailTrait').innerText = item.selectedTrait || '씨의 색깔';
+      document.getElementById('statDom').innerText = item.simulationStats.dominant !== undefined ? item.simulationStats.dominant : item.simulationStats.yellow;
+      document.getElementById('statRec').innerText = item.simulationStats.recessive !== undefined ? item.simulationStats.recessive : item.simulationStats.green;
       document.getElementById('statTotal').innerText = item.simulationStats.total;
       document.getElementById('statRatio').innerText = `${item.simulationStats.ratio} : 1`;
 
@@ -339,8 +345,9 @@
 
 [학생 제출 데이터]
 - 학생명: ${student.studentName}
+- 선택한 탐구 형질: ${student.selectedTrait || '씨의 색깔'}
 - 가설: ${student.hypothesis}
-- 교배 결과 데이터: 총 ${student.simulationStats.total}회 중 노란 완두 ${student.simulationStats.yellow}개, 초록 완두 ${student.simulationStats.green}개 (비율: ${student.simulationStats.ratio}:1)
+- 교배 결과 데이터: 총 ${student.simulationStats.total}회 중 우성 개체 ${student.simulationStats.dominant !== undefined ? student.simulationStats.dominant : student.simulationStats.yellow}개, 열성 개체 ${student.simulationStats.recessive !== undefined ? student.simulationStats.recessive : student.simulationStats.green}개 (비율: ${student.simulationStats.ratio}:1)
 - Q1 답안: ${student.q1Answer}
 - Q2 답안: ${student.q2Answer}
 
@@ -353,19 +360,29 @@
 `;
 
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent", {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-goog-api-key': apiKey
+          },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: "application/json"
-            }
+            contents: [{ parts: [{ text: prompt }] }]
           })
         });
 
         const data = await response.json();
-        const jsonText = data.candidates[0].content.parts[0].text;
+        
+        // API 응답 오류 및 undefined 방어 로직 추가
+        if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content) {
+          console.error("API Response Error:", data);
+          throw new Error("AI 응답을 받을 수 없거나 데이터 형식이 올바르지 않습니다. (API 키 상태를 확인하세요)");
+        }
+
+        let jsonText = data.candidates[0].content.parts[0].text;
+        
+        // JSON 파싱 에러 방지 (마크다운 포맷팅 ```json ... ``` 자동 제거)
+        jsonText = jsonText.replace(/```json/gi, '').replace(/```/g, '').trim();
         const result = JSON.parse(jsonText);
 
         document.getElementById('evalQ1Grade').value = result.q1Grade || '기본';
