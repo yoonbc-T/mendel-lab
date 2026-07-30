@@ -186,11 +186,14 @@
     let submissionsData = {};
     let selectedStudentId = null;
 
+    // 기본 Firebase DB URL 설정 (자동 적용)
+    const DEFAULT_DB_URL = "https://mendel-lab-default-rtdb.asia-southeast1.firebasedatabase.app";
+
     window.onload = function() {
-      const savedDbUrl = localStorage.getItem('teacher_db_url');
+      const savedDbUrl = localStorage.getItem('teacher_db_url') || DEFAULT_DB_URL;
       const savedApiKey = localStorage.getItem('teacher_gemini_key');
 
-      if (savedDbUrl) document.getElementById('dbUrl').value = savedDbUrl;
+      document.getElementById('dbUrl').value = savedDbUrl;
       if (savedApiKey) document.getElementById('geminiApiKey').value = savedApiKey;
 
       if (savedDbUrl) {
