@@ -169,9 +169,41 @@
       </div>
     </section>
 
-    <section id="step5Section" class="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 opacity-50 pointer-events-none transition-opacity duration-500">
-      <h2 class="text-lg font-bold text-emerald-900 mb-4 flex items-center gap-2">
+    <section id="punnettSection" class="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 opacity-50 pointer-events-none transition-opacity duration-500">
+      <h2 class="text-lg font-bold text-emerald-900 mb-2 flex items-center gap-2">
         <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold">Step 5</span>
+        퍼넷 사각형으로 F2 유전자형 조합하기
+      </h2>
+      <p class="text-xs text-slate-500 mb-5">
+        F1(잡종 1대)의 유전자형은 <strong id="pF1Genotype" class="text-emerald-700"></strong>입니다. F1이 자가교배하면 각 부모가 만드는 생식세포(배우자)는 표의 가로·세로에 적힌 대립유전자 중 하나를 가집니다. 빈칸을 눌러 알맞은 F2 유전자형을 완성해 보세요.
+      </p>
+
+      <div class="grid grid-cols-3 gap-2 max-w-sm mx-auto text-center">
+        <div></div>
+        <div id="pColA" class="bg-amber-100 text-amber-700 rounded-lg py-2 font-bold flex items-center justify-center"></div>
+        <div id="pColB" class="bg-emerald-100 text-emerald-700 rounded-lg py-2 font-bold flex items-center justify-center"></div>
+
+        <div id="pRowA" class="bg-amber-100 text-amber-700 rounded-lg font-bold flex items-center justify-center"></div>
+        <div id="pCell00" class="border-2 border-slate-200 rounded-lg min-h-[52px] flex items-center justify-center flex-wrap"></div>
+        <div id="pCell01" class="border-2 border-slate-200 rounded-lg min-h-[52px] flex items-center justify-center flex-wrap"></div>
+
+        <div id="pRowB" class="bg-emerald-100 text-emerald-700 rounded-lg font-bold flex items-center justify-center"></div>
+        <div id="pCell10" class="border-2 border-slate-200 rounded-lg min-h-[52px] flex items-center justify-center flex-wrap"></div>
+        <div id="pCell11" class="border-2 border-slate-200 rounded-lg min-h-[52px] flex items-center justify-center flex-wrap"></div>
+      </div>
+      <p id="punnettFeedback" class="text-center text-xs font-bold text-rose-500 h-4 mt-3"></p>
+
+      <div id="punnettResult" class="hidden mt-2 bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center space-y-1">
+        <p class="text-sm font-bold text-emerald-800">🎉 F2 유전자형 조합 완성!</p>
+        <p class="text-xs text-slate-700">유전자형 비율: <span id="punnettGenoRatio" class="font-semibold"></span></p>
+        <p class="text-xs text-slate-700">표현형 비율: <span id="punnettPhenoRatio" class="font-semibold"></span></p>
+        <p class="text-[11px] text-slate-500 mt-2">Step 4의 시뮬레이션 결과와 비교해보세요. 교배 횟수가 많아질수록 실제 비율이 이 이론적 비율(3:1)에 가까워집니다.</p>
+      </div>
+    </section>
+
+    <section id="step6Section" class="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 opacity-50 pointer-events-none transition-opacity duration-500">
+      <h2 class="text-lg font-bold text-emerald-900 mb-4 flex items-center gap-2">
+        <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold">Step 6</span>
         멘델의 고민 따라가기
       </h2>
       <div class="space-y-4">
@@ -205,9 +237,9 @@
       </div>
     </section>
 
-    <section id="step6Section" class="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 space-y-6 opacity-50 pointer-events-none transition-opacity duration-500">
+    <section id="step7Section" class="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 space-y-6 opacity-50 pointer-events-none transition-opacity duration-500">
       <h2 class="text-lg font-bold text-emerald-900 flex items-center gap-2">
-        <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold">Step 6</span>
+        <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold">Step 7</span>
         탐구 결과 정리 및 제출
       </h2>
       <div class="space-y-2">
@@ -233,7 +265,7 @@
       { category: "줄기의 키", dom: "큰 키", rec: "작은 키", domA: "T", recA: "t", iconD: "🌲", iconR: "🌱", colorD: "text-cyan-600", colorR: "text-lime-600", bgD: "bg-cyan-500", bgR: "bg-lime-500", boxD: "bg-cyan-50 border-cyan-200", boxR: "bg-lime-50 border-lime-200" }
     ];
 
-    let domCount = 0, recCount = 0, gameStep = 0;
+    let domCount = 0, recCount = 0, gameStep = 0, punnettSolved = 0;
     let currentTrait = mendelTraits[0];
     let gameQuestions = [...mendelTraits].sort(() => Math.random() - 0.5);
 
@@ -278,6 +310,7 @@
       document.getElementById('labelDom').innerText = `${currentTrait.iconD} ${currentTrait.dom}`;
       document.getElementById('labelRec').innerText = `${currentTrait.iconR} ${currentTrait.rec}`;
       checkF1Input();
+      initPunnettSquare();
       resetSimulation();
     }
 
@@ -286,6 +319,61 @@
       const block = document.getElementById('step3bBlock');
       block.classList.toggle('opacity-40', !filled);
       block.classList.toggle('pointer-events-none', !filled);
+    }
+
+    function initPunnettSquare() {
+      const t = currentTrait;
+      punnettSolved = 0;
+      document.getElementById('pF1Genotype').innerText = `${t.domA}${t.recA} (${t.iconD}${t.dom}, ${t.iconR}${t.rec} 대립유전자를 모두 가짐)`;
+      document.getElementById('pColA').innerText = t.domA;
+      document.getElementById('pColB').innerText = t.recA;
+      document.getElementById('pRowA').innerText = t.domA;
+      document.getElementById('pRowB').innerText = t.recA;
+      document.getElementById('punnettResult').classList.add('hidden');
+
+      const cells = [
+        { id: 'pCell00', row: t.domA, col: t.domA },
+        { id: 'pCell01', row: t.domA, col: t.recA },
+        { id: 'pCell10', row: t.recA, col: t.domA },
+        { id: 'pCell11', row: t.recA, col: t.recA }
+      ];
+      cells.forEach(c => {
+        const answer = (c.row + c.col).split('').sort().join('');
+        const cell = document.getElementById(c.id);
+        cell.dataset.answer = answer;
+        cell.innerHTML = `<button onclick="revealPunnettOptions('${c.id}')" class="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-lg transition">?</button>`;
+      });
+    }
+
+    function revealPunnettOptions(cellId) {
+      const t = currentTrait;
+      const options = [`${t.domA}${t.domA}`, `${t.domA}${t.recA}`, `${t.recA}${t.recA}`].sort(() => Math.random() - 0.5);
+      const cell = document.getElementById(cellId);
+      cell.innerHTML = options.map(o =>
+        `<button onclick="checkPunnettCell('${cellId}','${o}')" class="text-xs bg-white border border-slate-300 hover:border-emerald-500 rounded-lg px-2 py-1 m-0.5 font-medium">${o}</button>`
+      ).join('');
+    }
+
+    function checkPunnettCell(cellId, choice) {
+      const cell = document.getElementById(cellId);
+      const choiceSorted = choice.split('').sort().join('');
+      if (choiceSorted === cell.dataset.answer) {
+        cell.innerHTML = `<span class="font-bold text-emerald-800 text-base">${choice}</span>`;
+        cell.classList.add('bg-emerald-50');
+        punnettSolved++;
+        document.getElementById('punnettFeedback').innerText = '';
+        if (punnettSolved === 4) showPunnettResult();
+      } else {
+        const fb = document.getElementById('punnettFeedback');
+        fb.innerText = `"${cellId.slice(-2)}" 칸을 다시 생각해보세요! 가로·세로 유전자를 잘 살펴보세요.`;
+      }
+    }
+
+    function showPunnettResult() {
+      const t = currentTrait;
+      document.getElementById('punnettResult').classList.remove('hidden');
+      document.getElementById('punnettGenoRatio').innerText = `${t.domA}${t.domA} : ${t.domA}${t.recA} : ${t.recA}${t.recA} = 1 : 2 : 1`;
+      document.getElementById('punnettPhenoRatio').innerHTML = `${t.iconD} ${t.dom} : ${t.iconR} ${t.rec} = 3 : 1`;
     }
 
     function runSimulation(times) {
